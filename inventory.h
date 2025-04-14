@@ -12,7 +12,10 @@ typedef struct {
 
 extern Item inventory[MAX_ITEMS];
 extern int numItems;
+extern pthread_mutex_t inventoryLock;
 
+
+int getItemIndexById(int itemId);
 void initializeInventory();
 void restockItem(int itemId);
 
