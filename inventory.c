@@ -18,7 +18,6 @@ pthread_mutex_t inventoryLock = PTHREAD_MUTEX_INITIALIZER;
 void initializeInventory() {
     pthread_mutex_lock(&inventoryLock);
 
-    // Example items (You can modify or load from config file if needed)
     inventory[0] = (Item){.id = 1, .name = "Shampoo", .quantity = 5, .price = 5.99};
     inventory[1] = (Item){.id = 2, .name = "Soap", .quantity = 4, .price = 1.49};
     inventory[2] = (Item){.id = 3, .name = "Toothpaste", .quantity = 6, .price = 3.49};

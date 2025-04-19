@@ -6,7 +6,7 @@
 typedef struct {
     int id;
     char name[50];
-    int quantity;
+    int quantity; 
     float price;
 } Item;
 

@@ -19,7 +19,6 @@ pthread_t managerThread;
 
 // Mutex (declared in inventory.c) is used to protect shared inventory
 
-// Function to simulate a customer thread
 void* customerThread(void* arg) {
     int customerId = *(int*)arg;
     free(arg);
@@ -30,7 +29,7 @@ void* customerThread(void* arg) {
         int quantity = (rand() % 4) + 1;      // Quantity between 1-4
 
         placeOrder(customerId, itemId, quantity);
-        sleep(rand() % 2); // Simulate delay between orders
+        sleep(rand() % 2); 
     }
 
     return NULL;

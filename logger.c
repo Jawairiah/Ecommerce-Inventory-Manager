@@ -8,7 +8,6 @@
 // Mutex for log file access
 pthread_mutex_t logMutex = PTHREAD_MUTEX_INITIALIZER;
 
-// Helper: Get current timestamp string
 void getTimestamp(char* buffer, size_t size) {
     time_t now = time(NULL);
     struct tm* t = localtime(&now);
