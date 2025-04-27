@@ -6,9 +6,6 @@
 #include "logger.h"
 
 int main() {
-    // Seed random number generator for order simulation
-    srand(time(NULL));
-
     // Step 1: Initialize the inventory with predefined items
     initializeInventory();
 

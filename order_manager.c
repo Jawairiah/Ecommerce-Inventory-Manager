@@ -12,6 +12,7 @@
 
 // Global semaphore to signal restocking
 sem_t stockThreshold;
+sem_t restockDone;
 
 // Array to store thread IDs
 pthread_t customerThreads[NUM_CUSTOMERS];
@@ -46,22 +47,32 @@ void placeOrder(int customerId, int itemId, int quantity) {
         return;
     }
 
-    if (inventory[index].quantity >= quantity) {
-        inventory[index].quantity -= quantity;
-
-        printf("[Order] Customer %d ordered %d of %s (ID %d). Remaining: %d\n",
-               customerId, quantity, inventory[index].name, itemId, inventory[index].quantity);
-
-        logOrder(customerId, itemId, quantity, 1); // success
-
-        if (inventory[index].quantity < 3) {
-            sem_post(&stockThreshold); // trigger restock
-        }
-    } else {
+    // If not enough stock
+    if (inventory[index].quantity < quantity) {
         printf("[Order] Customer %d failed to order %d of %s (only %d left).\n",
                customerId, quantity, inventory[index].name, inventory[index].quantity);
 
         logOrder(customerId, itemId, quantity, 0); // failure
+        pthread_mutex_unlock(&inventoryLock);
+        return;
+    }
+
+    // Enough stock, proceed
+    inventory[index].quantity -= quantity;
+
+    printf("[Order] Customer %d ordered %d of %s (ID %d). Remaining: %d\n",
+           customerId, quantity, inventory[index].name, itemId, inventory[index].quantity);
+
+    logOrder(customerId, itemId, quantity, 1); // success
+
+    // If after ordering, quantity drops below 3
+    if (inventory[index].quantity < 3) {
+        sem_post(&stockThreshold); // Ask inventory manager to restock
+        pthread_mutex_unlock(&inventoryLock);
+
+        sem_wait(&restockDone); // ✅ Wait for restocking to complete
+
+        pthread_mutex_lock(&inventoryLock); // Relock to ensure consistency
     }
 
     pthread_mutex_unlock(&inventoryLock);
@@ -79,6 +90,7 @@ void* inventoryManagerThread(void* arg) {
                 pthread_mutex_unlock(&inventoryLock);
                 restockItem(id);
                 logRestock(id, 10);
+                sem_post(&restockDone); 
                 break;
             }
         }
@@ -91,6 +103,7 @@ void* inventoryManagerThread(void* arg) {
 // Initialize threads
 void initializeThreads() {
     sem_init(&stockThreshold, 0, 0);
+    sem_init(&restockDone, 0, 0);
 
     // Create inventory manager thread
     pthread_create(&managerThread, NULL, inventoryManagerThread, NULL);
@@ -116,4 +129,6 @@ void cleanupResources() {
 
     // Destroy semaphore
     sem_destroy(&stockThreshold);
+    sem_destroy(&restockDone);
+    
 }
