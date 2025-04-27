@@ -70,7 +70,7 @@ void placeOrder(int customerId, int itemId, int quantity) {
         sem_post(&stockThreshold); // Ask inventory manager to restock
         pthread_mutex_unlock(&inventoryLock);
 
-        sem_wait(&restockDone); // ✅ Wait for restocking to complete
+        sem_wait(&restockDone); // Wait for restocking to complete
 
         pthread_mutex_lock(&inventoryLock); // Relock to ensure consistency
     }
